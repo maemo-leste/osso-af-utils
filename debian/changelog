@@ -1,3 +1,9 @@
+osso-af-utils (1.4-1fix) unstable; urgency=low
+
+  * Added dependency to osso-core-config. Fixes: NB#39387
+
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Mon, 11 Sep 2006 14:23:14 +0300
+
 osso-af-utils (1.4-1) unstable; urgency=low
 
   * Corrected length of the bootup progress bar (N#22474).
