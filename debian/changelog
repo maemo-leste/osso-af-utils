@@ -1,3 +1,9 @@
+osso-af-utils (1.16-1~unreleased) unstable; urgency=low
+
+  * Support symbolic key codes in xset770. Related to NB#81350
+
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Tue, 22 Apr 2008 14:49:59 +0300
+
 osso-af-utils (1.15-4) unstable; urgency=low
 
   * Increased fb-progress.sh progress bar delay from 10s to 18s :o(
