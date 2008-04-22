@@ -5,7 +5,7 @@
 
   @author Tapani P&auml;lli <tapani.palli@nokia.com>
 
-  Copyright (C) 2005-2006 Nokia Corporation. All rights reserved.
+  Copyright (C) 2005-2008 Nokia Corporation. All rights reserved.
   
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@
   - Xlib
   - xsp extension
 
-  ---------------------------------------------------------
+  ------------------------------------------------------------------
   770 keycodes ...
 
   MENU  70
@@ -36,8 +36,9 @@
    +    74
   PWR  124
 
-  example : turn keyrepeat on homekey off : "xset770 -r 70 0"
-  ---------------------------------------------------------
+  example  : turn keyrepeat on homekey off : "xset770 -r 70 0"
+  example2 : turn keyrepeat off with enter : "xset770 -r KP_Enter 0"
+  ------------------------------------------------------------------
 */
 
 #include <stdio.h>
@@ -105,7 +106,7 @@ set_keyrepeat (int id, int key, int val)
 
 static void usage(void)
 {
-  fprintf(stderr, "usage : -r <key> <value>\n");
+  fprintf(stderr, "usage : -r <key> <value>\nkey can be mnemonic name (keysymdef.h) or a key code\n");
   exit (1);
 }
 
@@ -117,6 +118,7 @@ int main (int argc, char*argv[])
 {
   int i, j, n_devices = 0;
   int key = -1, val = 0; /* for keyrepeat */
+  char *keystr;
   XDeviceInfo *devices = NULL;
 
   dpy = XOpenDisplay(NULL);
@@ -159,11 +161,22 @@ int main (int argc, char*argv[])
 	usage();
       }
 
+      keystr = argv[i+1];
+
       key = atoi(argv[++i]);
       val = atoi(argv[++i]);
 
       /* check validity */
       if (key <= 0)
+      {
+	key = XStringToKeysym (keystr);
+	if (key != NoSymbol)
+	{
+	  key = XKeysymToKeycode (dpy, key);
+	}
+      }
+
+      if (key == NoSymbol || key == 0)
       {
 	usage();
       }
