@@ -1,4 +1,4 @@
-osso-af-utils (1.16-1~unreleased) unstable; urgency=low
+osso-af-utils (1.16-1) unstable; urgency=low
 
   * Support symbolic key codes in xset770. Related to NB#81350
 
