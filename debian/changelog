@@ -1,3 +1,10 @@
+osso-af-utils (1.16-2) unstable; urgency=low
+
+  * Added a required 'Fixes' line.
+  * Fixes: NB#81350
+
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Mon, 19 May 2008 12:09:30 +0300
+
 osso-af-utils (1.16-1) unstable; urgency=low
 
   * Support symbolic key codes in xset770. Related to NB#81350
