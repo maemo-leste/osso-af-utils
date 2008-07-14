@@ -1,3 +1,10 @@
+osso-af-utils (1.17-1) unstable; urgency=low
+
+  * Lower startup progress bar animation duration to 11s
+  * Fixes: NB#85269
+
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Mon, 14 Jul 2008 13:32:34 +0300
+
 osso-af-utils (1.16-2) unstable; urgency=low
 
   * Added a required 'Fixes' line.
