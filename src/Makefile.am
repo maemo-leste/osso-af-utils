@@ -50,10 +50,10 @@ temp_reaper_SOURCES = \
 	temp-reaper.c
 
 play_sound_LDFLAGS = \
-     `pkg-config --libs gconf-2.0 esound`
+     `pkg-config --libs gconf-2.0 libcanberra`
 
 play_sound_CFLAGS = \
-     `pkg-config --cflags gconf-2.0 esound`
+     `pkg-config --cflags gconf-2.0 libcanberra`
 
 play_sound_SOURCES = \
 	play-sound.c

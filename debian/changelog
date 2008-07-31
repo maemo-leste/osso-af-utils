@@ -1,3 +1,10 @@
+osso-af-utils (2.0-1) unstable; urgency=low
+
+  * First Fremantle version.
+  * Drop libesd dependency and use libcanberra instead. Fixes: NB#87262
+
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Thu, 31 Jul 2008 16:52:02 +0300
+
 osso-af-utils (1.17-1) unstable; urgency=low
 
   * Lower startup progress bar animation duration to 11s
