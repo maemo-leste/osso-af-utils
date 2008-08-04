@@ -51,9 +51,11 @@ static int play_sound(char *filename)
         else 
                 pan = 2;
 
-        /* The full volume should be about 30% of maximum,
+        /* FIXME: This might need adjusting...
+         *
+         * The volume is from -0dB to -6dB,
            The full volume is marked as 2 in gconf */
-        volume = ((float)pan / 2.0) * 0.3;
+        volume = ((1.0 - (float)pan / 2.0)) * (-6.0);
 
         if ((ret = ca_context_create(&ca_con)) != CA_SUCCESS) {
                 fprintf(stderr, "ca_context_create: %s\n", ca_strerror(ret));
@@ -66,7 +68,7 @@ static int play_sound(char *filename)
         ca_proplist_create(&pl);
         ca_proplist_sets(pl, CA_PROP_MEDIA_FILENAME, filename);
         ca_proplist_setf(pl, CA_PROP_CANBERRA_VOLUME, "%f", volume);
-    
+
         ret = ca_context_play_full(ca_con, 0, pl, callback, NULL);
         fprintf(stderr, "ca_context_play_full (vol %f): %s\n", volume,
                 ca_strerror(ret));

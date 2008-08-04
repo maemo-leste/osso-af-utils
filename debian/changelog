@@ -1,9 +1,9 @@
-osso-af-utils (2.0-1~unreleased) unstable; urgency=low
+osso-af-utils (2.0-1) unstable; urgency=low
 
   * First Fremantle version.
-  * Drop libesd dependency and use libcanberra instead. Fixes: NB#87262
+  * libcanberra instead of libesd. Fixes: NB#87262
 
- -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Thu, 31 Jul 2008 16:52:02 +0300
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Mon, 04 Aug 2008 12:52:25 +0300
 
 osso-af-utils (1.17-1) unstable; urgency=low
 
