@@ -5,12 +5,7 @@
 
 set -e
 
-if [ -e /targets/links/scratchbox.config ]; then
-  . /targets/links/scratchbox.config
-  USERHOME="$SBOX_TARGET_DIR/home/user"
-else
-  USERHOME="/home/user"
-fi
+USERHOME="/etc/skel"
 
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
