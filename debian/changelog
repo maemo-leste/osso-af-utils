@@ -1,3 +1,9 @@
+osso-af-utils (2.1-1) unstable; urgency=low
+
+  * Remove console pollution via > /dev/null 2>&1
+
+ -- Gabriel Schulhof <kimmo.hamalainen@nokia.com>  Wed,  6 May 2009 15:41:12 +0300
+
 osso-af-utils (2.0-3) unstable; urgency=low
 
   * Get rid of postinst and postrm altogether

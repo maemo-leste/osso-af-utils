@@ -37,7 +37,7 @@ start)
         if [ "x$BOOTREASON" != "xcharger" \
 	     -a ! -f /tmp/skip-fb-progress.tmp ]; then
         	echo "Starting: fb-progress"
-        	fb-progress -l $IMGDIR/$LOGO -g $IMGDIR/$BAR $SECS &
+        	fb-progress -l $IMGDIR/$LOGO -g $IMGDIR/$BAR $SECS > /dev/null 2>&1 &
         	echo "$!" > $PIDFILE
         	chmod 666 $PIDFILE
 	fi
