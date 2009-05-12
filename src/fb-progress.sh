@@ -28,7 +28,7 @@ IMGDIR=/usr/share/icons/hicolor/scalable/hildon
 LOGO=qgn_indi_startup_nokia_logo.png
 BAR=qgn_indi_progressbar.png
 
-SECS=10
+SECS=9
 
 case "$1" in
 start)	
