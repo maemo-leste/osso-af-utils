@@ -4,7 +4,7 @@ osso-af-utils (2.2-1) unstable; urgency=low
   * Fixes: NB#115524 (Progress of the device booting does not occoupy the full screen width)
   * Fixes: NB#116077 (Progress indicator shown during startup nearly upto 65%)
 
- -- Gabriel Schulhof <kimmo.hamalainen@nokia.com>  Tue, 12 May 2009 10:02:56 +0300
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Tue, 12 May 2009 10:02:56 +0300
 
 osso-af-utils (2.1-1) unstable; urgency=low
 
