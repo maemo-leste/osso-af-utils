@@ -1,3 +1,9 @@
+osso-af-utils (2.3-1) unstable; urgency=low
+
+  * Add 32 bpp support for fb-progress
+
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Wed, 13 May 2009 17:07:48 +0300
+
 osso-af-utils (2.2-1) unstable; urgency=low
 
   * Adjust the number of seconds to display the progress bar

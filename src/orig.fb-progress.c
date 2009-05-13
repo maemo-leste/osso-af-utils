@@ -117,13 +117,11 @@
 
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
 
 typedef struct {
 	int fd;		/* framebuffer device file descriptor */
 	int wd;		/* screen width in pixels (shorts) */
 	int ht;		/* visible screen height */
-  int depth; /* bytes per pixel */
 	void *mem;	/* memory mapped framebuffer */
 	size_t size;	/* size of mapped memory in bytes */
 
@@ -137,7 +135,7 @@ typedef struct {
 typedef struct {
 	int wd;
 	int ht;
-	uint8_t *pixel_buffer;
+	uint16_t *pixel_buffer;
 } image_info_t;
 
 
@@ -149,8 +147,8 @@ typedef struct {
 	/* clear screen before progressing */
 	int do_clear;
 	/* color for clearing and progressbar */
-	uint32_t bg_color;
-	uint32_t bar_color;
+	uint16_t bg_color;
+	uint16_t bar_color;
 	/* be verbose */
 	int verbose;
 	/* logo image to show */
@@ -399,10 +397,10 @@ static myfb_t* fb_init(void)
 		       vinfo.bits_per_pixel,
 		       finfo.line_length);
 	}
+	Fb.wd = finfo.line_length / sizeof(uint16_t);
 	Fb.size = finfo.line_length * vinfo.yres;
 	Fb.wd = vinfo.xres;
 	Fb.ht = vinfo.yres;
-  Fb.depth = ((vinfo.bits_per_pixel) >> 3);
 
 	Fb.mem = mmap(0, Fb.size, PROT_READ | PROT_WRITE, MAP_SHARED, Fb.fd, 0);
 	if (Fb.mem == MAP_FAILED) {
@@ -499,9 +497,7 @@ static void fb_exit(void)
 static int draw_steps(int start, int end, int max)
 {
 	int x, w, h, off;
-	uint8_t *dst;
-  uint32_t color;
-  uint16_t clr16;
+	uint16_t *dst, color;
 
 	if (end < start) {
 		fprintf(stderr, "ERROR: end step (%d) is smaller than start (%d)\n", end, start);
@@ -518,27 +514,17 @@ static int draw_steps(int start, int end, int max)
 	h = PROGRESS_HEIGHT;
 
 	/* destination offset is calculated from the screen bottom */
-	dst = (uint8_t *)(Fb.mem + Fb.size) - Fb.wd * Fb.depth * h + start * Fb.depth;
+	dst = (uint16_t *)(Fb.mem + Fb.size) - Fb.wd * h + start;
 	off = Fb.wd - w;
 
-  if (2 == Fb.depth)
-    clr16 = rgb_888_to_565(Options.bar_color);
-  else
-  if (4 == Fb.depth)
-  	color = Options.bar_color;
-
+	color = Options.bar_color;
 	while (--h >= 0) {
 
 		x = w;
 		while (--x >= 0) {
-      if (2 == Fb.depth)
-  			*(uint16_t *)dst = clr16;
-      else
-      if (4 == Fb.depth)
-        *(uint32_t *)dst = color;
-      dst += Fb.depth;
+			*dst++ = color;
 		}
-		dst += off * Fb.depth;
+		dst += off;
 	}
 
 	fb_dirty(start, Fb.ht - PROGRESS_HEIGHT, end, Fb.ht);
@@ -549,11 +535,9 @@ static int draw_steps(int start, int end, int max)
  */
 static int draw_steps_with_image(int start, int end, int max)
 {
-	int w, h, off_src, off_dst, step, flush_x1, flush_x2, byte;
-	uint8_t *src, *dst, *line_start;
+	int w, h, off_src, off_dst, step, flush_x1, flush_x2;
+	uint16_t *src, *dst, *line_start;
 	image_info_t *image = Options.img_progress;
-
-//  printf("draw_steps_with_image(start = %d, end = %d, max = %d): Entering\n", start, end, max);
 
 	if (end < start) {
 		fprintf(stderr, "ERROR: end step (%d) is smaller than start (%d)\n", end, start);
@@ -574,11 +558,11 @@ static int draw_steps_with_image(int start, int end, int max)
 	flush_x2 = end * PROGRESS_ADVANCE;
 	
 	/* destination offset is calculated from the screen bottom */
-	line_start = (uint8_t *)(Fb.mem + Fb.size) - Fb.wd * Fb.depth * image->ht;
+	line_start = (uint16_t *)(Fb.mem + Fb.size) - Fb.wd * image->ht;
 
 	/* all drawing is done one PROGRESS_ADVANCE sized block at the time */
-	off_src = (image->wd - PROGRESS_ADVANCE) * Fb.depth;
-	off_dst = (Fb.wd - PROGRESS_ADVANCE) * Fb.depth;
+	off_src = image->wd - PROGRESS_ADVANCE;
+	off_dst = Fb.wd - PROGRESS_ADVANCE;
 
 	if (!start) {
 		/* draw left end */
@@ -587,8 +571,7 @@ static int draw_steps_with_image(int start, int end, int max)
 
 		for (h = 0; h < image->ht; h++) {
 			for (w = 0; w < PROGRESS_ADVANCE; w++) {
-        for (byte = Fb.depth ; byte > 0 ; byte--)
-  				*dst++ = *src++;
+				*dst++ = *src++;
 			}
 			dst += off_dst;
 			src += off_src;
@@ -605,30 +588,28 @@ static int draw_steps_with_image(int start, int end, int max)
 	end--;
 	
 	/* tile middle part */
-	line_start += start * PROGRESS_ADVANCE * Fb.depth;
+	line_start += start * PROGRESS_ADVANCE;
         for (step = start; step < end; step++) {
 		dst = line_start;
 		/* middle part is after left part */
-		src = image->pixel_buffer + PROGRESS_ADVANCE * Fb.depth;
+		src = image->pixel_buffer + PROGRESS_ADVANCE;
 		
 		for (h = 0; h < image->ht; h++) {
 			for (w = 0; w < PROGRESS_ADVANCE; w++) {
-        for (byte = Fb.depth ; byte > 0 ; byte--)
-  				*dst++ = *src++;
+				*dst++ = *src++;
 			}
 			dst += off_dst;
 			src += off_src;
 		}
-		line_start += PROGRESS_ADVANCE * Fb.depth;
+		line_start += PROGRESS_ADVANCE;
 	}
 
 	/* draw right end */
 	dst = line_start;
-	src = image->pixel_buffer + 2 * PROGRESS_ADVANCE * Fb.depth;
+	src = image->pixel_buffer + 2*PROGRESS_ADVANCE;
 	for (h = 0; h < image->ht; h++) {
 		for (w = 0; w < PROGRESS_ADVANCE; w++) {
-      for (byte = Fb.depth ; byte > 0 ; byte--)
-  			*dst++ = *src++;
+			*dst++ = *src++;
 		}
 		dst += off_dst;
 		src += off_src;
@@ -664,64 +645,42 @@ static void fb_clear_with_image(void)
 	/* Image smaller than screen.
 	 * Drawing image to center of screen.
 	 */
-	uint8_t *out = Fb.mem;
-	uint8_t *in = image.pixel_buffer;
+	uint16_t *out = Fb.mem;
+	uint16_t *in = image.pixel_buffer;
 	int start_x = (Fb.wd - image.wd) / 2;
 	int start_y = (Fb.ht - image.ht) / 2;
-	uint32_t bg_color;
-  uint16_t bg_clr16;
+	uint16_t bg_color = Options.bg_color;
 	int i,j;
-
-  if (4 == Fb.depth)
-    bg_color = Options.bg_color;
-  else
-  if (2 == Fb.depth)
-    bg_clr16 = rgb_888_to_565(Options.bg_color);
-
+	
 	/* put some color above the image */
 	if (Options.do_clear) {
 		for (j = 0; j < start_y; j++) {
 			for (i = 0; i < Fb.wd; i++) {
-        if (2 == Fb.depth)
-  			  *(uint16_t *)out = bg_clr16;
-        else
-        if (4 == Fb.depth)
-          *(uint32_t *)out = bg_color;
-        out += Fb.depth;
+				*out++ = bg_color;
 			}
 		}
 	} else {
-		out += start_y * Fb.wd * Fb.depth;
+		out += start_y * Fb.wd;
 	}
 	
 	/* now image to the center and bg_color to both sides */
 	for (j = 0; j < image.ht; j++) {
 		if (Options.do_clear) {
 			for (i = 0; i < start_x; i++) {
-        if (2 == Fb.depth)
-  			  *(uint16_t *)out = bg_clr16;
-        else
-        if (4 == Fb.depth)
-          *(uint32_t *)out = bg_color;
-        out += Fb.depth;
+				*out++ = bg_color;
 			}
 		} else {
-			out += start_x * Fb.depth;
+			out += start_x;
 		}
-		for (i = 0; i < image.wd * Fb.depth; i++) {
+		for (i = 0; i < image.wd; i++) {
 			*out++ = *in++;
 		}
 		if (Options.do_clear) {
 			for (i = start_x + image.wd; i < Fb.wd; i++) {
-        if (2 == Fb.depth)
-  			  *(uint16_t *)out = bg_clr16;
-        else
-        if (4 == Fb.depth)
-          *(uint32_t *)out = bg_color;
-        out += Fb.depth;
+				*out++ = bg_color;
 			}
 		} else {
-			out += (Fb.wd - image.wd - start_x) * Fb.depth;
+			out += (Fb.wd - image.wd - start_x);
 		}
 	}
 		
@@ -729,12 +688,7 @@ static void fb_clear_with_image(void)
 	if (Options.do_clear) {
 		for (j = 0; j < (Fb.ht - image.ht - start_y); j++) {
 			for (i = 0; i < Fb.wd; i++) {
-        if (2 == Fb.depth)
-  			  *(uint16_t *)out = bg_clr16;
-        else
-        if (4 == Fb.depth)
-          *(uint32_t *)out = bg_color;
-        out += Fb.depth;
+				*out++ = bg_color;
 			}
 		}
 		fb_dirty(0, 0, Fb.wd, Fb.ht);
@@ -757,26 +711,15 @@ static void rgb_to_16(uint8_t *buf, uint16_t *result, const unsigned int width)
         }
 }
 
-static void
-rgb_to_32(uint8_t *buf, uint32_t *result, const unsigned int width)
-{
-  uint32_t *end = result + width;
-  for (; result < end ; result++, buf += 3)
-    *result = 0x00ffffff &
-      ((((uint32_t)(buf[0])) << 16) | 
-       (((uint32_t)(buf[1])) <<  8) | 
-        ((uint32_t)(buf[2])));
-}
-
 /* based on jpeglib.h example.c */
-static image_info_t *decompress_jpeg(const char *filename, int depth)
+static image_info_t *decompress_jpeg(const char *filename)
 {
 	struct jpeg_decompress_struct cinfo;
         struct jpeg_error_mgr jerr;
-	uint8_t *tmp;
+	uint16_t *tmp;
 	FILE *fp;
 	image_info_t image, *ret;
-	uint8_t *buf = NULL;
+	uint8_t *buf;
 	int a;
 	
 	cinfo.err = jpeg_std_error(&jerr);
@@ -796,39 +739,35 @@ static image_info_t *decompress_jpeg(const char *filename, int depth)
 	/* If we need scaling, implement it here*/
         image.wd = cinfo.output_width;
         image.ht = cinfo.output_height;
-
+	
 	buf = malloc(cinfo.output_width * cinfo.output_components * sizeof(char));
 	if (!buf) {
 		return NULL;
 	}
 	
-	image.pixel_buffer = malloc(image.wd * image.ht * depth);
+	image.pixel_buffer = malloc(image.wd * image.ht *  sizeof(uint16_t));
         if (!image.pixel_buffer) {
                 return NULL;
 	}
 	tmp=image.pixel_buffer;
 	for (a = 0; a < cinfo.output_height; a++) {
 		jpeg_read_scanlines(&cinfo, (JSAMPARRAY) &buf, 1);
-    if (2 == depth)
-  		rgb_to_16(buf, (uint16_t *)tmp, cinfo.output_width );
-    else
-      rgb_to_32(buf, (uint32_t *)tmp, cinfo.output_width);
-		tmp+=cinfo.output_width * depth;
+		rgb_to_16(buf, tmp, cinfo.output_width );
+		tmp+=cinfo.output_width;
 	}
 	
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 	fclose(fp);
 
-  if (buf)
-  	free(buf);
+	free(buf);
 
         ret = malloc (sizeof(image_info_t));
         *ret = image;
 	return ret;
 }
 
-static image_info_t *decompress_png(const char *filename, int depth)
+static image_info_t *decompress_png(const char *filename)
 {
 	FILE *fp;
 	char  header[8];
@@ -863,10 +802,10 @@ static image_info_t *decompress_png(const char *filename, int depth)
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		return NULL;
 	}
-
+	
 	png_init_io(png_ptr, fp);
 	png_set_sig_bytes(png_ptr, 8);
-
+	
 	png_uint_32 wd, ht;
 	int bit_depth, color_type;
 
@@ -888,7 +827,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	/* we are pleased with 8 bit per pixel */
 	if (bit_depth == 16) 
 		png_set_strip_16(png_ptr);
-
+	
 	png_read_update_info(png_ptr, info_ptr);
 	png_uint_32 rowbytes = png_get_rowbytes(png_ptr, info_ptr);
 	
@@ -912,7 +851,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	
 	png_read_image(png_ptr, row_pointers);
 	
-	image.pixel_buffer = malloc(image.wd * image.ht * depth);
+	image.pixel_buffer = malloc(image.wd * image.ht *  sizeof(uint16_t));
 	if (!image.pixel_buffer) {
 		fprintf(stderr, "Not enought memory\n");
 		free(image_data);
@@ -923,22 +862,14 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	int k=0;
 	for (j = 0; j < image.ht; j++) {
 		uint8_t *picture = row_pointers[j];
+		uint16_t red, green, blue;
 		for (i = 0; i < image.wd; i++) {
-      if (2 == depth)
-  			*(uint16_t *)(image.pixel_buffer + k) = 
-          ((((uint16_t)(picture[0] >> 3)) << 11) | 
-           (((uint16_t)(picture[1] >> 2)) <<  5) | 
-            ((uint16_t)(picture[2] >> 3)));
-      else
-      if (4 == depth)
-        /* Assuming 0xAARRGGBB */
-        *(uint32_t *)(image.pixel_buffer + k) = 0x00ffffff & 
-          ((((uint32_t)(picture[0])) << 16) | 
-           (((uint32_t)(picture[1])) <<  8) | 
-            ((uint32_t)(picture[2])));
-
-			k += depth;
-      picture += 3;
+			red = (*picture++ >> 3);
+			green = (*picture++ >> 2);
+			blue = (*picture++ >> 3);
+			
+			*(image.pixel_buffer + k) = red << 11 | green << 5 | blue;
+			k++;
 		}
 	}
 	
@@ -986,14 +917,13 @@ static void usage(const char *name, const char *error)
 
 int main(int argc, const char *argv[])
 {
-  const char *img_logo_name = NULL, *img_progress_name = NULL;
 	int vt = 0, i, color, steps, step = 0, oldstep = 0, secs;
 	struct timespec sleep_req, sleep_rem;
 	myfb_t *fb;
 
 	/* default options */
-	Options.bg_color = COLOR_BG_DEFAULT;
-	Options.bar_color = COLOR_BAR_DEFAULT;
+	Options.bg_color = rgb_888_to_565(COLOR_BG_DEFAULT);
+	Options.bar_color = rgb_888_to_565(COLOR_BAR_DEFAULT);
 	
 	/* ---------- parse args ----------- */
 	for (i = 1; i < argc; i++) {
@@ -1011,14 +941,14 @@ int main(int argc, const char *argv[])
 				usage(*argv, "color hex value missing");
 			}
 			color = strtol(argv[i], NULL, 16);
-			Options.bg_color = color;
+			Options.bg_color = rgb_888_to_565(color);
 			break;
 		case 'p':
 			if (++i >= argc) {
 				usage(*argv, "color hex value missing");
 			}
 			color = strtol(argv[i], NULL, 16);
-			Options.bar_color = color;
+			Options.bar_color = rgb_888_to_565(color);
 			break;
 		case 'c':
 			Options.do_clear = 1;
@@ -1034,13 +964,29 @@ int main(int argc, const char *argv[])
 			if (++i >= argc) {
 				usage(*argv, "-l <logo image> image file name missing");
 			}
-      img_logo_name = argv[i];
+			Options.img_logo = decompress_png(argv[i]);
+			if (!Options.img_logo) {
+				/* If png fails, try jpeg */
+				Options.img_logo = decompress_jpeg(argv[i]);
+				if (!Options.img_logo) {
+					usage(*argv, "logo image loading failed");
+				}
+			}
 			break;
 		case 'g':
 			if (++i >= argc) {
 				usage(*argv, "-g <progressbar image> image file name missing");
 			}
-      img_progress_name = argv[i];
+			Options.img_progress = decompress_png(argv[i]);
+			if (!Options.img_progress) {
+				usage(*argv, "progress graphics loading failed");
+			}
+			if (Options.img_progress->ht > PROGRESS_HEIGHT_MAX) {
+				usage(*argv, "progress image too high");
+			}
+			if (Options.img_progress->wd != 3*PROGRESS_ADVANCE) {
+				usage(*argv, "progress image width not 3*8");
+			}
 			break;
 		case 'v':
 			Options.verbose = 1;
@@ -1086,38 +1032,13 @@ int main(int argc, const char *argv[])
 		console_switch(vt);
 		return -1;
 	}
-
 	if (fb->ht < PROGRESS_HEIGHT_MAX) {
 		fprintf(stderr, "Error: progress bar max hight higher (%d) than screen (%d)\n", PROGRESS_HEIGHT_MAX, fb->ht);
 		fb_exit();
 		console_switch(vt);
 		return -1;
 	}
-
-  if (img_logo_name) {
-		Options.img_logo = decompress_png(img_logo_name, fb->depth);
-		if (!Options.img_logo) {
-			/* If png fails, try jpeg */
-			Options.img_logo = decompress_jpeg(img_logo_name, fb->depth);
-			if (!Options.img_logo) {
-				usage(*argv, "logo image loading failed");
-			}
-		}
-  }
-
-  if (img_progress_name) {
-		Options.img_progress = decompress_png(img_progress_name, fb->depth);
-		if (!Options.img_progress) {
-			usage(*argv, "progress graphics loading failed");
-		}
-		if (Options.img_progress->ht > PROGRESS_HEIGHT_MAX) {
-			usage(*argv, "progress image too high");
-		}
-		if (Options.img_progress->wd != 3*PROGRESS_ADVANCE) {
-			usage(*argv, "progress image width not 3*8");
-		}
-  }
-
+	
 	if (Options.img_logo &&
 	    (Options.img_logo->ht > fb->ht ||
 	     Options.img_logo->wd > fb->wd)) {
