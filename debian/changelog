@@ -1,4 +1,4 @@
-osso-af-utils (2.3-2) unstable; urgency=low
+osso-af-utils (2.4-1) unstable; urgency=low
 
   [ David Kedves ]
   * Adding debian/tmp-reaper.xsession
