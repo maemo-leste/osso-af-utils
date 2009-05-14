@@ -97,6 +97,7 @@ binary-arch: build install
 	dh_installchangelogs ChangeLog
 	dh_installdocs
 #	dh_installexamples
+	dh_installxsession --name=tmp-reaper -u 'post 41'
 	dh_install --sourcedir=src
 #	dh_installmenu
 #	dh_installdebconf	
