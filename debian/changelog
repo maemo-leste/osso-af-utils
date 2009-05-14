@@ -2,7 +2,7 @@ osso-af-utils (2.4-1) unstable; urgency=low
 
   [ David Kedves ]
   * Adding debian/tmp-reaper.xsession
-  * Fixes: NB#46920 (File /etc/X11/Xsession.post/41tmp-reaper should be part of the osso-af-utils package)
+  * Fixes: NB#103382 (File /etc/X11/Xsession.post/41tmp-reaper should be part of the osso-af-utils package)
 
  -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Thu, 14 May 2009 14:14:06 +0300
 
