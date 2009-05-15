@@ -1,3 +1,9 @@
+osso-af-utils (2.4-2) unstable; urgency=low
+
+  * Use a different method for installing xsession script
+
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Fri, 15 May 2009 14:35:29 +0300
+
 osso-af-utils (2.4-1) unstable; urgency=low
 
   [ David Kedves ]
