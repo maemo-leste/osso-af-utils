@@ -81,6 +81,7 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
+	dh_installxsession --name=tmp-reaper -u 'post 41'
 
 	# Add here commands to install the package into debian/osso-af-utils.
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/osso-af-utils
@@ -97,7 +98,6 @@ binary-arch: build install
 	dh_installchangelogs ChangeLog
 	dh_installdocs
 #	dh_installexamples
-	dh_installxsession --name=tmp-reaper -u 'post 41'
 	dh_install --sourcedir=src
 #	dh_installmenu
 #	dh_installdebconf	
