@@ -1,3 +1,9 @@
+osso-af-utils (2.4-3) unstable; urgency=low
+
+  * Add --sysconfdir=/etc to configure in debian/rules
+
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Mon, 18 May 2009 17:03:15 +0300
+
 osso-af-utils (2.4-2) unstable; urgency=low
 
   * Use a different method for installing xsession script
