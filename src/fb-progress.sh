@@ -25,7 +25,7 @@ if [ ! -d $AF_PIDDIR ]; then
 fi
 PIDFILE=$AF_PIDDIR/fb-progress.pid
 IMGDIR=/usr/share/icons/hicolor/scalable/hildon
-LOGO=qgn_indi_startup_nokia_logo.png
+LOGO=startup_nokia_logo.png
 BAR=qgn_indi_progressbar.png
 
 SECS=9

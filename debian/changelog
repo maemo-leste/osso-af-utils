@@ -1,3 +1,10 @@
+osso-af-utils (2.5-1) unstable; urgency=low
+
+  * Use proper Nokia logo during fb-progress
+  * Fixes: NB#119311 (Color of Nokia logo (with boot progress animation) is not correct)
+
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Thu, 28 May 2009 16:40:14 +0300
+
 osso-af-utils (2.4-5) unstable; urgency=low
 
   * Remove priority number from the front of tmp-reaper
