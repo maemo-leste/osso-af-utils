@@ -115,6 +115,9 @@
 #define COLOR_BG_DEFAULT  0xffffff
 #define COLOR_BAR_DEFAULT 0x0040a3
 
+#define FRAME_RATE 3
+#define N_FRAMES 8
+
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
@@ -156,11 +159,13 @@ typedef struct {
 	/* logo image to show */
 	image_info_t *img_logo;
 	/* image to use for drawing the progress bar */
-	image_info_t *img_progress;
+	image_info_t *img_progress[N_FRAMES];
 } myoptions_t;
 
 static myfb_t Fb;
 static myoptions_t Options;
+
+static uint8_t counter = 0;
 
 /* converts 24-bit 888 RGB value to 16-bit 565 RGB value */
 static inline uint16_t rgb_888_to_565(int rgb888)
@@ -544,97 +549,47 @@ static int draw_steps(int start, int end, int max)
 	fb_dirty(start, Fb.ht - PROGRESS_HEIGHT, end, Fb.ht);
 	return 0;
 }
-/* draw progress bar between steps 'start' and 'end' when the
- * maximum number of steps is 'max'. return negative on error
+/* draw progress indicator 
  */
-static int draw_steps_with_image(int start, int end, int max)
+static int draw_steps_with_image()
 {
-	int w, h, off_src, off_dst, step, flush_x1, flush_x2, byte;
+	int w, h, off_src, off_dst, flush_x1, flush_x2, byte, x, y;
 	uint8_t *src, *dst, *line_start;
-	image_info_t *image = Options.img_progress;
+	image_info_t *image = Options.img_progress[counter];
 
-//  printf("draw_steps_with_image(start = %d, end = %d, max = %d): Entering\n", start, end, max);
-
-	if (end < start) {
-		fprintf(stderr, "ERROR: end step (%d) is smaller than start (%d)\n", end, start);
-		return -1;
-	}
-	if (end > max || end * PROGRESS_ADVANCE > Fb.wd) {
-		fprintf(stderr, "ERROR: end step (%d) is larger than max step (%d)\n", end, max);
-		return -1;
-	}
-	if (image->wd != 3*PROGRESS_ADVANCE) {
-		fprintf(stderr, "ERROR: progress image width != %d (3*%d)\n",
-			3*PROGRESS_ADVANCE, PROGRESS_ADVANCE);
-		return -1;
-	}
+      	counter = (++counter % 8);
 
 	/* area to flush */
-	flush_x1 = start * PROGRESS_ADVANCE;
-	flush_x2 = end * PROGRESS_ADVANCE;
+	flush_x1 = 0;
+	flush_x2 = image->wd;
 	
+	/* set the progress indicator to relative position of
+	 * horizontally centered, vertically 2/3 from top */
+	x = (Fb.wd / 2) + image->wd / 2;
+	y = (Fb.ht * 2 / 3) - image->ht / 2;
+
 	/* destination offset is calculated from the screen bottom */
-	line_start = (uint8_t *)(Fb.mem + Fb.size) - Fb.wd * Fb.depth * image->ht;
+	line_start = (uint8_t *)(Fb.mem + Fb.size) - 
+	  (Fb.wd * (Fb.ht - y) * Fb.depth + (x * Fb.depth));
 
-	/* all drawing is done one PROGRESS_ADVANCE sized block at the time */
-	off_src = (image->wd - PROGRESS_ADVANCE) * Fb.depth;
-	off_dst = (Fb.wd - PROGRESS_ADVANCE) * Fb.depth;
+	/* offsets to get the next line */
+	off_src = 0; /*  == (image->wd - image->wd) * Fb.depth; */
+	off_dst = (Fb.wd - image->wd) * Fb.depth;
 
-	if (!start) {
-		/* draw left end */
+	/* draw the image */
 		dst = line_start;
 		src = image->pixel_buffer;
 
 		for (h = 0; h < image->ht; h++) {
-			for (w = 0; w < PROGRESS_ADVANCE; w++) {
+	  for (w = 0; w < image->wd; w++) {
         for (byte = Fb.depth ; byte > 0 ; byte--)
   				*dst++ = *src++;
 			}
 			dst += off_dst;
 			src += off_src;
 		}
-		start++;
-	} else {
-		if (start > 1) {
-			/* overdraw last time end with middle tile */
-			start--;
-			flush_x1 -= PROGRESS_ADVANCE;
-		}
-	}
-	/* middle tile doesn't cover right end */
-	end--;
 	
-	/* tile middle part */
-	line_start += start * PROGRESS_ADVANCE * Fb.depth;
-        for (step = start; step < end; step++) {
-		dst = line_start;
-		/* middle part is after left part */
-		src = image->pixel_buffer + PROGRESS_ADVANCE * Fb.depth;
-		
-		for (h = 0; h < image->ht; h++) {
-			for (w = 0; w < PROGRESS_ADVANCE; w++) {
-        for (byte = Fb.depth ; byte > 0 ; byte--)
-  				*dst++ = *src++;
-			}
-			dst += off_dst;
-			src += off_src;
-		}
-		line_start += PROGRESS_ADVANCE * Fb.depth;
-	}
-
-	/* draw right end */
-	dst = line_start;
-	src = image->pixel_buffer + 2 * PROGRESS_ADVANCE * Fb.depth;
-	for (h = 0; h < image->ht; h++) {
-		for (w = 0; w < PROGRESS_ADVANCE; w++) {
-      for (byte = Fb.depth ; byte > 0 ; byte--)
-  			*dst++ = *src++;
-		}
-		dst += off_dst;
-		src += off_src;
-	}
-
-	fb_dirty(flush_x1, Fb.ht - image->ht, flush_x2, Fb.ht);
+	fb_dirty(flush_x1, y - image->ht, flush_x2, y);
 	return 0;
 }
 
@@ -965,14 +920,15 @@ static void usage(const char *name, const char *error)
 {
 	fprintf(stderr, "\nERROR: %s!\n\n", error);
 	printf("Usage: %s [options] <secs>\n\n"
-	       "A progress bar for the the framebuffer, show at the bottom.\n"
+	       "A) A progress bar for the the framebuffer, show at the bottom.\n"
+	       "B) A progress indicator for the the framebuffer.\n"
 	       "Options:\n"
 	       "-v\t\tverbose\n"
 	       "-c\t\tclear screen at startup\n"
 	       "-b <color>\tcolor to use for the clearing, as 24-bit hex value\n"
 	       "-p <color>\tcolor to use for the progressbar, as 24-bit hex value\n"
 	       "-l <image>\tlogo PNG image to show on the background\n"
-	       "-g <image>\tgraphics PNG image to use for drawing the progressbar\n"
+	       "-g <image>\tgraphics PNG image to use for drawing the progress indicator\n"
 	       "-t <vt>\t\tswitch to given virtual terminal while showing the progress\n"
 	       "-i <step>\tinitial seconds (< all secs)\n\n"
 	       "Examples:\n"
@@ -987,7 +943,7 @@ static void usage(const char *name, const char *error)
 int main(int argc, const char *argv[])
 {
   const char *img_logo_name = NULL, *img_progress_name = NULL;
-	int vt = 0, i, color, steps, step = 0, oldstep = 0, secs;
+	int vt = 0, i, color, steps, step = 0, oldstep = 0, secs, Nix;
 	struct timespec sleep_req, sleep_rem;
 	myfb_t *fb;
 
@@ -1038,7 +994,7 @@ int main(int argc, const char *argv[])
 			break;
 		case 'g':
 			if (++i >= argc) {
-				usage(*argv, "-g <progressbar image> image file name missing");
+				usage(*argv, "-g <progressbar image stub> image stub name missing");
 			}
       img_progress_name = argv[i];
 			break;
@@ -1105,17 +1061,26 @@ int main(int argc, const char *argv[])
 		}
   }
 
+  Options.img_progress[0] = NULL;
   if (img_progress_name) {
-		Options.img_progress = decompress_png(img_progress_name, fb->depth);
-		if (!Options.img_progress) {
-			usage(*argv, "progress graphics loading failed");
-		}
-		if (Options.img_progress->ht > PROGRESS_HEIGHT_MAX) {
-			usage(*argv, "progress image too high");
-		}
-		if (Options.img_progress->wd != 3*PROGRESS_ADVANCE) {
-			usage(*argv, "progress image width not 3*8");
-		}
+    /* Assumes N_FRAMES < 10 */
+    int img_progress_real_name_len = strlen(img_progress_name) + 6;
+    char *img_progress_real_name = malloc(img_progress_real_name_len);
+    if (img_progress_real_name != NULL) {
+      for (Nix = 0 ; Nix < N_FRAMES ; Nix++) {
+		  snprintf(img_progress_real_name, img_progress_real_name_len, "%s%d.png", img_progress_name, Nix + 1);
+		  printf("Loading image %s\n", img_progress_real_name);
+		  Options.img_progress[Nix] = decompress_png(img_progress_real_name, fb->depth);
+		  if (!Options.img_progress[Nix]) {
+			  /* If png fails, try jpeg */
+			  Options.img_progress[Nix] = decompress_jpeg(img_progress_name, fb->depth);
+			  if (!Options.img_progress[Nix]) {
+				  usage(*argv, "progress image loading failed");
+			  }
+		  }
+      }
+      free(img_progress_real_name);
+    }
   }
 
 	if (Options.img_logo &&
@@ -1134,9 +1099,10 @@ int main(int argc, const char *argv[])
 		fb_flush();
 	}
 	
-	/* re-calculate steps to correspond to seconds */
-	secs = steps;
-	steps = fb->wd / PROGRESS_ADVANCE;
+	/* re-calculate steps to correspond to 3 frames per second */
+	secs = steps / FRAME_RATE;
+	steps = steps * FRAME_RATE;
+
 	step = step * fb->wd / secs / PROGRESS_ADVANCE;
 	if (step < 2) {
 		/* image progress will be always at least two steps */
@@ -1145,9 +1111,11 @@ int main(int argc, const char *argv[])
 	/* calculate advancing time interval */
 	sleep_req.tv_sec = secs / steps;
 	sleep_req.tv_nsec = (long long)(secs % steps) * 1000000000L / steps;
-	
-	if (Options.img_progress) {
-		draw_steps_with_image(oldstep, step, steps);
+
+      	steps *= FRAME_RATE;
+
+	if (Options.img_progress[0]) {
+		draw_steps_with_image();
 	} else {
 		draw_steps(oldstep, step, steps);
 	}
@@ -1189,8 +1157,8 @@ int main(int argc, const char *argv[])
 				continue;
 			}
 		}
-		if (Options.img_progress) {
-			if (draw_steps_with_image(oldstep, step, steps) < 0) {
+		if (Options.img_progress[0]) {
+			if (draw_steps_with_image() < 0) {
 				break;
 			}
 		} else {
@@ -1209,6 +1177,7 @@ int main(int argc, const char *argv[])
 	fb_exit();
 	console_switch(vt);
 	free_image(Options.img_logo);
-	free_image(Options.img_progress);
+	for (Nix = 0 ; Nix < N_FRAMES ; Nix++)
+	  free_image(Options.img_progress[Nix]);
 	return 0;
 }

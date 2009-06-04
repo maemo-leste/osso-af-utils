@@ -1,3 +1,10 @@
+osso-af-utils (2.6-1) unstable; urgency=low
+
+  * A patch from Mox to modify the progress thingy
+  * Fixes: NB#119548 ([PATCH] During bootup, the progress indication with Nokia logo should be updated)
+
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Wed,  3 Jun 2009 16:08:26 +0300
+
 osso-af-utils (2.5-1) unstable; urgency=low
 
   * Use proper Nokia logo during fb-progress

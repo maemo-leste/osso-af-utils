@@ -26,7 +26,7 @@ fi
 PIDFILE=$AF_PIDDIR/fb-progress.pid
 IMGDIR=/usr/share/icons/hicolor/scalable/hildon
 LOGO=startup_nokia_logo.png
-BAR=qgn_indi_progressbar.png
+BAR=indicator_update_white
 
 SECS=9
 
