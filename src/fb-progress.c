@@ -754,11 +754,14 @@ static image_info_t *decompress_jpeg(const char *filename, int depth)
 
 	buf = malloc(cinfo.output_width * cinfo.output_components * sizeof(char));
 	if (!buf) {
+                fclose(fp);
 		return NULL;
 	}
 	
 	image.pixel_buffer = malloc(image.wd * image.ht * depth);
         if (!image.pixel_buffer) {
+                fclose(fp);
+                free(buf);
                 return NULL;
 	}
 	tmp=image.pixel_buffer;
@@ -799,6 +802,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	fread(header, 1, 8, fp);
 	int is_png = !png_sig_cmp(header, 0, 8);
 	if (!is_png) {
+                fclose(fp);
 		return NULL;
 	}
 	
@@ -806,16 +810,19 @@ static image_info_t *decompress_png(const char *filename, int depth)
 						      NULL, NULL, NULL);
 	if (!png_ptr) {
 		fprintf(stderr, "could not create png_ptr!\n");
+                fclose(fp);
 		return NULL;
 	}
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+                fclose(fp);
 		return NULL;
 	}
 	png_infop end_info = png_create_info_struct(png_ptr);
 	if (!end_info) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+                fclose(fp);
 		return NULL;
 	}
 
@@ -850,6 +857,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	uint8_t * image_data = malloc(rowbytes * image.ht);
 	if(!image_data) {
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+                fclose(fp);
 		return NULL;
 	}
 	
@@ -857,6 +865,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	if(!row_pointers) {
 		free(image_data);
 		png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+                fclose(fp);
 		return NULL;
 	}
 	
@@ -872,6 +881,8 @@ static image_info_t *decompress_png(const char *filename, int depth)
 		fprintf(stderr, "Not enought memory\n");
 		free(image_data);
                 png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+                fclose(fp);
+                free(row_pointers);
 		return NULL;
 	}
 	      
@@ -901,6 +912,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 	free(row_pointers);
 	free(image_data);
+        fclose(fp);
 	
 	ret = malloc (sizeof(image_info_t));
 	*ret = image;
@@ -1069,7 +1081,6 @@ int main(int argc, const char *argv[])
     if (img_progress_real_name != NULL) {
       for (Nix = 0 ; Nix < N_FRAMES ; Nix++) {
 		  snprintf(img_progress_real_name, img_progress_real_name_len, "%s%d.png", img_progress_name, Nix + 1);
-		  printf("Loading image %s\n", img_progress_real_name);
 		  Options.img_progress[Nix] = decompress_png(img_progress_real_name, fb->depth);
 		  if (!Options.img_progress[Nix]) {
 			  /* If png fails, try jpeg */

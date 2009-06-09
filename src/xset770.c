@@ -77,7 +77,6 @@ set_keyrepeat (int id, int key, int val)
 
   if (id > 0) {
     device = XOpenDevice(dpy, id);
-    evalues = (XKbdFeedbackControl *)calloc(sizeof(XKbdFeedbackControl), 1);
     if (!device)
       return;
 
@@ -85,6 +84,7 @@ set_keyrepeat (int id, int key, int val)
     if (feedback_id < 0)
       return;
 
+    evalues = (XKbdFeedbackControl *)calloc(sizeof(XKbdFeedbackControl), 1);
     evalues->id = feedback_id;
     evalues->key = key;
     evalues->auto_repeat_mode = val;

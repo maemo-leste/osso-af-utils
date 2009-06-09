@@ -108,6 +108,7 @@ binary-arch: build install
 #	dh_installcron
 #	dh_installinfo
 	dh_installman
+	dh_installxsession --init-script='tmp-reaper' -u 'post 41'
 	dh_link
 	dh_strip --dbg-package="osso-af-utils"
 	dh_compress

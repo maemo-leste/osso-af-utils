@@ -24,8 +24,9 @@ if [ ! -d $AF_PIDDIR ]; then
 	chmod 777 $AF_PIDDIR
 fi
 PIDFILE=$AF_PIDDIR/fb-progress.pid
-IMGDIR=/usr/share/icons/hicolor/scalable/hildon
+LOGO_IMGDIR=/usr/share/icons/hicolor/scalable/hildon
 LOGO=startup_nokia_logo.png
+BAR_IMGDIR=/usr/share/icons/hicolor/48x48/hildon
 BAR=indicator_update_white
 
 SECS=9
@@ -37,7 +38,7 @@ start)
         if [ "x$BOOTREASON" != "xcharger" \
 	     -a ! -f /tmp/skip-fb-progress.tmp ]; then
         	echo "Starting: fb-progress"
-        	fb-progress -l $IMGDIR/$LOGO -g $IMGDIR/$BAR $SECS > /dev/null 2>&1 &
+        	fb-progress -l $LOGO_IMGDIR/$LOGO -g $BAR_IMGDIR/$BAR $SECS > /dev/null 2>&1 &
         	echo "$!" > $PIDFILE
         	chmod 666 $PIDFILE
 	fi
