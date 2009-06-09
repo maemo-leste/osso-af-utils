@@ -142,7 +142,7 @@ CURSOR_NAMES = \
 	watcha \
 	xterm  
 
-CURSOR_DIR = $(datadir)/icons/xcursor-transparent/cursors
+CURSOR_DIR = $(datadir)/icons/default/cursors
 CURSOR_REAL = transp
 EXTRA_DIST = $(CURSOR_REAL)
 install-data-local:
