@@ -1,6 +1,7 @@
 osso-af-utils (2.11-1) unstable; urgency=low
 
   * Display black background and corresponding progress indicator during initial boot
+  * Fixes: NB#135953 (Startup sequence tuneup 1)
 
  -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Fri, 28 Aug 2009 14:33:42 +0300
 
