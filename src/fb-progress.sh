@@ -16,27 +16,31 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-AF_PIDDIR=/tmp/af-piddir
-if [ ! -d $AF_PIDDIR ]; then
-	# note, no write to flash involved here
-	mkdir $AF_PIDDIR
-	# I'm not the only one writing here
-	chmod 777 $AF_PIDDIR
-fi
 PIDFILE=$AF_PIDDIR/fb-progress.pid
 LOGO_IMGDIR=/usr/share/icons/hicolor/scalable/hildon
 LOGO=startup_nokia_logo.png
-BAR_IMGDIR=/usr/share/icons/hicolor/48x48/hildon
+BAR_IMGDIR=/usr/share/icons/hicolor/scalable/hildon
 BAR=indicator_update_white
 
 SECS=9
 
 case "$1" in
 start)	
+        # wait until we have /proc and /dev
+        while [ ! -f /proc/bootreason -o ! -e /dev/tty0  ]; do
+            sleep 1;
+        done
 	# don't show progress bar if device started to ACTDEAD first
-        BOOTREASON=`cat /proc/bootreason`
-        if [ "x$BOOTREASON" != "xcharger" \
+        BOOTSTATE=`getbootstate 2>/dev/null`
+        if [ "$BOOTSTATE" != "ACT_DEAD" \
 	     -a ! -f /tmp/skip-fb-progress.tmp ]; then
+                AF_PIDDIR=/tmp/af-piddir
+                if [ ! -d $AF_PIDDIR ]; then
+                    # note, no write to flash involved here
+                    mkdir $AF_PIDDIR
+                    # I'm not the only one writing here
+                    chmod 777 $AF_PIDDIR
+                fi
         	echo "Starting: fb-progress"
         	fb-progress -l $LOGO_IMGDIR/$LOGO -g $BAR_IMGDIR/$BAR $SECS > /dev/null 2>&1 &
         	echo "$!" > $PIDFILE

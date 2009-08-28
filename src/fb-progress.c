@@ -839,10 +839,6 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	image.wd = wd;
 	image.ht = ht;
 	
-	/* alpha channel not supported. At least not yet... */
-	if (color_type & PNG_COLOR_MASK_ALPHA)
-		png_set_strip_alpha(png_ptr);
-	
 	/* transfer image to RGB if not already */
 	if (color_type != PNG_COLOR_TYPE_RGB)
 		png_set_expand(png_ptr); 
@@ -850,6 +846,14 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	/* we are pleased with 8 bit per pixel */
 	if (bit_depth == 16) 
 		png_set_strip_16(png_ptr);
+
+        png_color_16 bgcolor = { 0 };
+        bgcolor.red = (Options.bg_color & 0xff0000) >> 16;
+        bgcolor.green = (Options.bg_color & 0x00ff00) >> 8;
+        bgcolor.blue = (Options.bg_color & 0x0000ff);
+        // composite the image against the background color
+        png_set_background(png_ptr, &bgcolor, PNG_BACKGROUND_GAMMA_SCREEN, 
+                           0, 1.0);
 
 	png_read_update_info(png_ptr, info_ptr);
 	png_uint_32 rowbytes = png_get_rowbytes(png_ptr, info_ptr);
@@ -888,7 +892,7 @@ static image_info_t *decompress_png(const char *filename, int depth)
 	      
 	int k=0;
 	for (j = 0; j < image.ht; j++) {
-		uint8_t *picture = row_pointers[j];
+            uint8_t *picture = row_pointers[j];
 		for (i = 0; i < image.wd; i++) {
       if (2 == depth)
   			*(uint16_t *)(image.pixel_buffer + k) = 

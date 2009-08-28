@@ -1,3 +1,18 @@
+osso-af-utils (2.10-1) unstable; urgency=low
+
+  * Use dot animation (indicator_update_white icons), handle transparency.
+    Fixes: NB#127978 - No progress indicator is visible below the Nokia logo
+
+ -- Viktor Nagy <vik@garage.maemo.org>  Thu, 16 Jul 2009 17:23:55 +0200
+
+osso-af-utils (2.9-1) unstable; urgency=low
+
+  * Wait until /proc and /tmp is mounted, check boot state instead of
+    boot reason.
+    Fixes: NB#123050 - Osso-af-utils tries to open file which does not exit
+
+ -- Viktor Nagy <vik@garage.maemo.org>  Tue, 30 Jun 2009 10:52:57 +0200
+
 osso-af-utils (2.8-1) unstable; urgency=low
 
   * Install cursors into /usr/share/icons/default
