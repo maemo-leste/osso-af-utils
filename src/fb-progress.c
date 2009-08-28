@@ -112,7 +112,7 @@
  * - clears to white
  * - bar is blue Nokia logo blue
  */
-#define COLOR_BG_DEFAULT  0xffffff
+#define COLOR_BG_DEFAULT  0x000000
 #define COLOR_BAR_DEFAULT 0x0040a3
 
 #define FRAME_RATE 3

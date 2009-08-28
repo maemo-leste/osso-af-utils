@@ -1,3 +1,9 @@
+osso-af-utils (2.11-1) unstable; urgency=low
+
+  * Display black background and corresponding progress indicator during initial boot
+
+ -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Fri, 28 Aug 2009 14:33:42 +0300
+
 osso-af-utils (2.10-1) unstable; urgency=low
 
   * Use dot animation (indicator_update_white icons), handle transparency.

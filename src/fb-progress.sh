@@ -17,10 +17,8 @@
 # 02110-1301 USA
 
 PIDFILE=$AF_PIDDIR/fb-progress.pid
-LOGO_IMGDIR=/usr/share/icons/hicolor/scalable/hildon
-LOGO=startup_nokia_logo.png
 BAR_IMGDIR=/usr/share/icons/hicolor/scalable/hildon
-BAR=indicator_update_white
+BAR=indicator_update
 
 SECS=9
 
@@ -42,7 +40,7 @@ start)
                     chmod 777 $AF_PIDDIR
                 fi
         	echo "Starting: fb-progress"
-        	fb-progress -l $LOGO_IMGDIR/$LOGO -g $BAR_IMGDIR/$BAR $SECS > /dev/null 2>&1 &
+        	fb-progress -c -g $BAR_IMGDIR/$BAR $SECS > /dev/null 2>&1 &
         	echo "$!" > $PIDFILE
         	chmod 666 $PIDFILE
 	fi
