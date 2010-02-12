@@ -16,7 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
 # 02110-1301 USA
 
-PIDFILE=$AF_PIDDIR/fb-progress.pid
+PIDFILE=/tmp/fb-progress.pid
 BAR_IMGDIR=/usr/share/icons/hicolor/scalable/hildon
 BAR=indicator_update
 

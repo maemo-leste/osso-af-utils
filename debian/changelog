@@ -1,6 +1,13 @@
+osso-af-utils (2.12-1) unstable; urgency=low
+
+  * Fixes: NB#137214 - osso-af-utils -- fb-progress.pid located in root
+
+ -- Kimmo Hämäläinen <kimmo.hamalainen@nokia.com>  Fri, 12 Feb 2010 11:04:58 +0200
+
 osso-af-utils (2.11-1) unstable; urgency=low
 
-  * Display black background and corresponding progress indicator during initial boot
+  * Display black background and corresponding progress indicator during
+    initial boot
   * Fixes: NB#135953 (Startup sequence tuneup 1)
 
  -- Gabriel Schulhof <gabriel.schulhof@nokia.com>  Fri, 28 Aug 2009 14:33:42 +0300
