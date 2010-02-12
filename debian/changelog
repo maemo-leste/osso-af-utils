@@ -1,3 +1,10 @@
+osso-af-utils (2.12-1+0m5) unstable; urgency=low
+
+  * This entry has been added by BIFH queue processor
+    Suffix +0m5 added to package revision
+
+ -- Gary Birkett <ext-gary.2.birkett@nokia.com>  Fri, 12 Feb 2010 12:55:00 +0200
+
 osso-af-utils (2.12-1) unstable; urgency=low
 
   * Fixes: NB#137214 - osso-af-utils -- fb-progress.pid located in root
