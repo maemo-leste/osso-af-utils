@@ -24,12 +24,12 @@ SECS=9
 
 case "$1" in
 start)	
-        # wait until we have /proc and /dev
-        while [ ! -f /proc/bootreason -o ! -e /dev/tty0  ]; do
+        # wait until we have /dev
+        while [ ! -e /dev/tty0  ]; do
             sleep 1;
         done
 	# don't show progress bar if device started to ACTDEAD first
-        BOOTSTATE=`getbootstate 2>/dev/null`
+        BOOTSTATE=`cat /var/lib/dsme/saved_state`
         if [ "$BOOTSTATE" != "ACT_DEAD" \
 	     -a ! -f /tmp/skip-fb-progress.tmp ]; then
                 AF_PIDDIR=/tmp/af-piddir
