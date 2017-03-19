@@ -1,13 +1,13 @@
 bin_PROGRAMS = xset770 ageoffile play-sound
 sbin_PROGRAMS = waitdbus waitx runas fb-progress temp-reaper anim-shower
 
-INCLUDES = `pkg-config --cflags gdk-2.0 dbus-1` 
+AM_CPPFLAGS = `pkg-config --cflags gdk-2.0 dbus-1`
 
 xset770_INCLUDES = \
-	`pkg-config --cflags x11 xsp xi xproto inputproto`
+	`pkg-config --cflags x11 xi xproto inputproto`
 
 xset770_LDFLAGS = \
-	`pkg-config --libs x11 xsp xi xproto inputproto`
+	`pkg-config --libs x11 xi xproto inputproto`
 
 fb_progress_LDFLAGS = \
 	`pkg-config --libs libpng12` -ljpeg

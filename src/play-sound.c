@@ -40,9 +40,9 @@ static int play_sound(char *filename)
         ca_context *ca_con;
         ca_proplist *pl = NULL;
         float volume;
-
+#if !GLIB_CHECK_VERSION(2,35,0)
         g_type_init();
-
+#endif
         gc = gconf_client_get_default();
         value = gconf_client_get(gc, ALARM_GCONF_PATH, NULL);
 
