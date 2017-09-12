@@ -1,5 +1,11 @@
 osso-af-utils (2.13-1) unstable; urgency=low
 
+  * enable git builds and update control file to latest standard
+
+ -- Ivan J. <parazyd@dyne.org>  Tue, 12 Sep 2017 23:35:00 +0200
+
+osso-af-utils (2.13-1) unstable; urgency=low
+
   * Do not call getbootstate, it can increase reboot count which causing MALF
     Instead read bootreason from file /var/lib/dsme/saved_state
   * Do not wait for /proc/bootreason file, it could not exists on upstream kernel
