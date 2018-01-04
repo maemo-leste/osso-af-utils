@@ -111,7 +111,7 @@ binary-arch: build install
 	dh_installman
 	dh_installxsession --init-script='tmp-reaper' -u 'post 41'
 	dh_link
-	dh_strip --dbg-package="osso-af-utils"
+	dh_strip
 	dh_compress
 	dh_fixperms
 #	dh_perl
