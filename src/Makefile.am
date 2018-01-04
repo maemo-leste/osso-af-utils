@@ -10,7 +10,7 @@ xset770_LDFLAGS = \
 	`pkg-config --libs x11 xi xproto inputproto`
 
 fb_progress_LDFLAGS = \
-	`pkg-config --libs libpng12` -ljpeg
+	`pkg-config --libs libpng` -ljpeg
 
 anim_shower_LDFLAGS = \
 	`pkg-config --cflags --libs gdk-2.0`
