@@ -1,62 +1,48 @@
 bin_PROGRAMS = xset770 ageoffile play-sound
 sbin_PROGRAMS = waitdbus waitx runas fb-progress temp-reaper anim-shower
 
-AM_CPPFLAGS = `pkg-config --cflags gdk-2.0 dbus-1`
+xset770_CFLAGS = $(X11_CFLAGS) $(XI_CFLAGS)
+xset770_LDFLAGS = $(X11_LIBS) $(XI_LIBS)
+xset770_SOURCES = \
+	xset770.c
 
-xset770_INCLUDES = \
-	`pkg-config --cflags x11 xi xproto inputproto`
+fb_progress_CFLAGS = $(LIBPNG_CFLAGS) $(LIBJPEG_CFLAGS)
+fb_progress_LDFLAGS = $(LIBPNG_LIBS) $(LIBJPEG_LIBS)
+fb_progress_SOURCES = \
+	fb-progress.c \
+	omapfb.h
 
-xset770_LDFLAGS = \
-	`pkg-config --libs x11 xi xproto inputproto`
+anim_shower_CFLAGS = $(GDK_CFLAGS)
+anim_shower_LDFLAGS = $(GDK_LIBS)
+anim_shower_SOURCES = \
+	anim-shower.c
 
-fb_progress_LDFLAGS = \
-	`pkg-config --libs libpng` -ljpeg
-
-anim_shower_LDFLAGS = \
-	`pkg-config --cflags --libs gdk-2.0`
-
+waitdbus_CFLAGS = $(DBUS_CFLAGS)
+waitdbus_LDFLAGS = $(DBUS_LIBS)
 waitdbus_SOURCES = \
 	waitdbus.c \
 	waitdbus.h
 
-waitdbus_LDFLAGS = \
-	`pkg-config --libs dbus-1`
-
+waitx_CFLAGS = $(X11_CFLAGS)
+waitx_LDFLAGS = $(X11_LIBS)
 waitx_SOURCES = \
 	waitx.c \
 	waitx.h
 
-waitx_LDFLAGS = \
-	-L/usr/X11R6/lib -lX11
+play_sound_CFLAGS = $(GCONF_CFLAGS) $(CANBERRA_CFLAGS)
+play_sound_LDFLAGS = $(GCONF_LIBS) $(CANBERRA_LIBS)
+play_sound_SOURCES = \
+	play-sound.c
 
 runas_SOURCES = \
 	runas.h \
 	runas.c
 
-fb_progress_SOURCES = \
-	fb-progress.c \
-	omapfb.h
-
-anim_shower_SOURCES = \
-	anim-shower.c
-
 ageoffile_SOURCES = \
 	ageoffile.c
 
-xset770_SOURCES = \
-	xset770.c
-
 temp_reaper_SOURCES = \
 	temp-reaper.c
-
-play_sound_LDFLAGS = \
-     `pkg-config --libs gconf-2.0 libcanberra`
-
-play_sound_CFLAGS = \
-     `pkg-config --cflags gconf-2.0 libcanberra`
-
-play_sound_SOURCES = \
-	play-sound.c
 
 CURSOR_NAMES = \
 	00008160000006810000408080010102 \
@@ -140,15 +126,15 @@ CURSOR_NAMES = \
 	ur_angle \
 	v_double_arrow \
 	watcha \
-	xterm  
+	xterm
 
 CURSOR_DIR = $(datadir)/icons/default/cursors
 CURSOR_REAL = transp
 EXTRA_DIST = $(CURSOR_REAL)
 install-data-local:
 
-	$(mkinstalldirs) $(DESTDIR)$(CURSOR_DIR); 
-	$(INSTALL_DATA) $(CURSOR_REAL) $(DESTDIR)$(CURSOR_DIR)/ 
+	$(mkinstalldirs) $(DESTDIR)$(CURSOR_DIR);
+	$(INSTALL_DATA) $(CURSOR_REAL) $(DESTDIR)$(CURSOR_DIR)/
 	for CURSOR in $(CURSOR_NAMES); do \
 		echo '-- Installing cursor '$$CURSOR; \
 		ln -s transp $(DESTDIR)$(CURSOR_DIR)/$$CURSOR; \
