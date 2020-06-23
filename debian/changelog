@@ -1,3 +1,9 @@
+osso-af-utils (2.14.2) unstable; urgency=medium
+
+  * Port fb-progress.sh to OpenRC.
+
+ -- Ivan J. <parazyd@dyne.org>  Wed, 24 Jun 2020 00:23:48 +0200
+
 osso-af-utils (2.14.1) unstable; urgency=medium
 
   * Removed transparent cursor theme
