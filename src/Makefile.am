@@ -43,3 +43,6 @@ ageoffile_SOURCES = \
 
 temp_reaper_SOURCES = \
 	temp-reaper.c
+
+fbprogressdir = $(sysconfdir)/init.d
+fbprogress_DATA = fb-progress.sh
